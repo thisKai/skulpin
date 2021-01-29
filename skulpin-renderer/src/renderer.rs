@@ -371,10 +371,10 @@ impl Renderer {
         window: &dyn Window,
         f: F,
     ) -> VkResult<()> {
-        if window.physical_size() != self.previous_inner_size {
-            debug!("Detected window inner size change, rebuilding swapchain");
-            self.rebuild_swapchain(window)?;
-        }
+        // if window.physical_size() != self.previous_inner_size {
+        //     debug!("Detected window inner size change, rebuilding swapchain");
+        //     self.rebuild_swapchain(window)?;
+        // }
 
         let result = self.do_draw(window, f);
         if let Err(e) = result {
