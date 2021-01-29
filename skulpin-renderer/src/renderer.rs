@@ -296,7 +296,7 @@ impl Renderer {
         let swapchain = ManuallyDrop::new(VkSwapchain::new(
             &instance,
             &device,
-            window,
+            window.physical_size(),
             None,
             &present_mode_priority,
         )?);
@@ -392,9 +392,15 @@ impl Renderer {
         }
     }
 
-    pub fn rebuild_swapchain(
+    fn rebuild_swapchain(
         &mut self,
         window: &dyn Window,
+    ) -> VkResult<()> {
+        self.resize_swapchain(window.physical_size())
+    }
+    pub fn resize_swapchain(
+        &mut self,
+        physical_size: PhysicalSize,
     ) -> VkResult<()> {
         unsafe {
             self.device.logical_device.device_wait_idle()?;
@@ -408,7 +414,7 @@ impl Renderer {
         let new_swapchain = ManuallyDrop::new(VkSwapchain::new(
             &self.instance,
             &self.device,
-            window,
+            physical_size,
             Some(self.swapchain.swapchain),
             &self.present_mode_priority,
         )?);
@@ -428,7 +434,7 @@ impl Renderer {
             plugin.swapchain_created(&self.device, &self.swapchain)?;
         }
 
-        self.previous_inner_size = window.physical_size();
+        self.previous_inner_size = physical_size;
 
         Ok(())
     }

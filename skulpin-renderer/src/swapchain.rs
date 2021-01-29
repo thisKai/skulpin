@@ -7,8 +7,7 @@ use ash::version::DeviceV1_0;
 use super::VkInstance;
 use super::VkDevice;
 use super::VkQueueFamilyIndices;
-use crate::PresentMode;
-use super::Window;
+use crate::{PhysicalSize, PresentMode};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
@@ -40,7 +39,7 @@ impl VkSwapchain {
     pub fn new(
         instance: &VkInstance,
         device: &VkDevice,
-        window: &dyn Window,
+        physical_size: PhysicalSize,
         old_swapchain: Option<vk::SwapchainKHR>,
         present_mode_priority: &[PresentMode],
     ) -> VkResult<VkSwapchain> {
@@ -51,7 +50,7 @@ impl VkSwapchain {
             &device.surface_loader,
             device.surface,
             &device.queue_family_indices,
-            window,
+            physical_size,
             old_swapchain,
             present_mode_priority,
         )?;
@@ -118,7 +117,7 @@ impl VkSwapchain {
         surface_loader: &ash::extensions::khr::Surface,
         surface: ash::vk::SurfaceKHR,
         queue_family_indices: &VkQueueFamilyIndices,
-        window: &dyn Window,
+        physical_size: PhysicalSize,
         old_swapchain: Option<vk::SwapchainKHR>,
         present_mode_priority: &[PresentMode],
     ) -> VkResult<(SwapchainInfo, khr::Swapchain, vk::SwapchainKHR)> {
@@ -128,7 +127,7 @@ impl VkSwapchain {
         let surface_format = Self::choose_format(&available_formats);
         info!("Surface format: {:?}", surface_format);
 
-        let extents = Self::choose_extents(&surface_capabilities, window);
+        let extents = Self::choose_extents(&surface_capabilities, physical_size);
         info!("Extents: {:?}", extents);
 
         let present_mode =
@@ -265,7 +264,7 @@ impl VkSwapchain {
 
     fn choose_extents(
         surface_capabilities: &vk::SurfaceCapabilitiesKHR,
-        window: &dyn Window,
+        physical_size: PhysicalSize,
     ) -> ash::vk::Extent2D {
         if surface_capabilities.current_extent.width != std::u32::MAX {
             debug!(
@@ -275,8 +274,6 @@ impl VkSwapchain {
             );
             surface_capabilities.current_extent
         } else {
-            let physical_size = window.physical_size();
-
             debug!(
                 "Swapchain extents chosen by inner window size ({} {})",
                 physical_size.width, physical_size.height
