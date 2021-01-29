@@ -392,7 +392,7 @@ impl Renderer {
         }
     }
 
-    fn rebuild_swapchain(
+    pub fn rebuild_swapchain(
         &mut self,
         window: &dyn Window,
     ) -> VkResult<()> {
